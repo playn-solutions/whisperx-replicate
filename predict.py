@@ -14,8 +14,7 @@ import ffmpeg
 
 compute_type = "float16"  # change to "int8" if low on GPU mem (may reduce accuracy)
 device = "cuda"
-whisper_arch = "./models/faster-whisper-large-v3"
-
+whisper_arch = "models/whisper-large-v3"
 
 class Output(BaseModel):
     segments: Any
@@ -59,7 +58,7 @@ class Predictor(BasePredictor):
                 default=None),
             batch_size: int = Input(
                 description="Parallelization of input audio transcription",
-                default=64),
+                default=8),
             temperature: float = Input(
                 description="Temperature to use for sampling",
                 default=0),
@@ -87,7 +86,7 @@ class Predictor(BasePredictor):
                 default=None),
             debug: bool = Input(
                 description="Print out compute/inference times and memory usage information",
-                default=False)
+                default=True)
     ) -> Output:
         with torch.inference_mode():
             asr_options = {
