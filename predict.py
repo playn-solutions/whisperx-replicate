@@ -173,11 +173,18 @@ class Predictor(BasePredictor):
             detected_language=detected_language
         )
 
+# Original version of the code, it does not work with our metadata
+#def get_audio_duration(file_path):
+#    probe = ffmpeg.probe(file_path)
+#    print("Full probe data:", probe)  # See all available metadata
+#    stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'audio'), None)
+#    print("Audio stream data:", stream)  # See just the audio stream metadata
+#    return float(stream['duration']) * 1000
 
+# This versions works for use, because our metadata looks different
 def get_audio_duration(file_path):
     probe = ffmpeg.probe(file_path)
-    stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'audio'), None)
-    return float(stream['duration']) * 1000
+    return float(probe['format']['duration'])
 
 
 def detect_language(full_audio_file_path, segments_starts, language_detection_min_prob,
