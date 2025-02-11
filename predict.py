@@ -182,10 +182,10 @@ class Predictor(BasePredictor):
 #    return float(stream['duration']) * 1000
 
 # This versions works for use, because our metadata looks different
+# IMPORTANT: We must return the duration in milliseconds, otherwise lang detections breaks
 def get_audio_duration(file_path):
     probe = ffmpeg.probe(file_path)
-    return float(probe['format']['duration'])
-
+    return float(probe['format']['duration']) * 1000
 
 def detect_language(full_audio_file_path, segments_starts, language_detection_min_prob,
                     language_detection_max_tries, asr_options, vad_options, iteration=1):
