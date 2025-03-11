@@ -190,11 +190,7 @@ def get_audio_duration(file_path):
 # Updated version of the orginal implementation
 # we have to use a workaround for avoding german recording being detected as english
 def detect_language(full_audio_file_path, segments_starts, language_detection_min_prob,
-                    language_detection_max_tries, asr_options, vad_options, iteration=1, detected_languages=None):
-    # Initialize detected_languages on first call
-    if detected_languages is None:
-        detected_languages = []
-    
+                    language_detection_max_tries, asr_options, vad_options, iteration=1):
     model = whisperx.load_model(whisper_arch, device, compute_type=compute_type, asr_options=asr_options,
                                 vad_options=vad_options)
     start_ms = segments_starts[iteration - 1]
