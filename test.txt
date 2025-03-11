@@ -1,0 +1,109 @@
+Max iteration: 3
+Min prob lang: 100%
+
+Test Case 1: Straightforward German detection
+
+test_german = [
+    {"language": "en", "probability": 0.45},
+    {"language": "de", "probability": 0.65},
+    {"language": "fr", "probability": 0.55}
+]
+Expected result: German returned with probability 0.65
+
+Test Log:
+1.
+detect_language = {language:"en",probability:"0.45",iteration:1}
+2.
+detect_language = {language:"de",probability:"0.65",iteration:2}
+3.
+detect_language = {language:"fr",probability:"0.55",iteration:3}
+
+we enter the if validation:
+german_detection = [{language:"de",probability:"0.65",iteration:2}]
+return {language:"de",probability:"0.65",iteration:2}
+
+===============================================
+Test Case 2: High confidence English + German
+test_misidentified_german = [
+    {"language": "en", "probability": 0.92},  # High confidence English
+    {"language": "de", "probability": 0.35},  # German that should be detected
+    {"language": "de", "probability": 0.40}
+]
+Expected result: German returned with probability 0.40
+
+Test Log:
+1.
+detect_language = {language:"en",probability:"0.92",iteration:1}
+2.
+detect_language = {language:"de",probability:"0.35",iteration:2}
+3.
+detect_language = {language:"de",probability:"0.40",iteration:3}
+
+we enter the if validation:
+german_detection = [{language:"de",probability:"0.35",iteration:2},{language:"de",probability:"0.40",iteration:3}]
+return {language:"de",probability:"0.40",iteration:3}
+
+===============================================
+Test Case 3: Multiple languages, no German
+test_no_german = [
+    {"language": "en", "probability": 0.63},
+    {"language": "fr", "probability": 0.75},
+    {"language": "it", "probability": 0.88},  # High confidence Italian
+]
+Expected result: Italian returned with probability 0.88
+
+Test Log:
+1.
+detect_language = {language:"en",probability:"0.63",iteration:1}
+2.
+detect_language = {language:"fr",probability:"0.75",iteration:2}
+3.
+detect_language = {language:"it",probability:"0.88",iteration:3}
+
+we enter the if validation:
+german_detection = [{language:"de",probability:"0.35",iteration:2},{language:"de",probability:"0.40",iteration:3}]
+return {language:"de",probability:"0.40",iteration:3}
+
+
+
+
+===============================================
+Test Case 4: German after high confidence other language
+test_german_late = [
+    {"language": "fr", "probability": 0.89},  # High confidence French
+    {"language": "de", "probability": 0.42},  # German that should be detected
+    {"language": "it", "probability": 0.72}
+]
+Expected result: German returned with probability 0.42
+
+
+===============================================
+Test Case 5: Multiple German segments with varying confidence
+test_multiple_german = [
+    {"language": "de", "probability": 0.39},  # Low confidence German
+    {"language": "en", "probability": 0.75},
+    {"language": "de", "probability": 0.82},  # Higher confidence German
+    {"language": "it", "probability": 0.62}
+]
+Expected result: Best German returned with probability 0.82
+
+
+===============================================
+Test Case 6: Very low confidence German vs high confidence other
+test_low_german_vs_high = [
+    {"language": "de", "probability": 0.11},  # Extremely low confidence German
+    {"language": "en", "probability": 0.92},  # Very high confidence English
+    {"language": "fr", "probability": 0.78}
+]
+Expected result: German returned with probability 0.11
+
+
+===============================================
+Test Case 7: Multi-language test
+test_multi_language = [
+    {"language": "it", "probability": 0.61},
+    {"language": "de", "probability": 0.45},
+    {"language": "fr", "probability": 0.83},  # High confidence French
+    {"language": "en", "probability": 0.77}
+]
+Expected result: German returned with probability 0.45

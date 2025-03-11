@@ -187,8 +187,14 @@ def get_audio_duration(file_path):
     probe = ffmpeg.probe(file_path)
     return float(probe['format']['duration']) * 1000
 
+# Updated version of the orginal implementation
+# we have to use a workaround for avoding german recording being detected as english
 def detect_language(full_audio_file_path, segments_starts, language_detection_min_prob,
-                    language_detection_max_tries, asr_options, vad_options, iteration=1):
+                    language_detection_max_tries, asr_options, vad_options, iteration=1, detected_languages=None):
+    # Initialize detected_languages on first call
+    if detected_languages is None:
+        detected_languages = []
+    
     model = whisperx.load_model(whisper_arch, device, compute_type=compute_type, asr_options=asr_options,
                                 vad_options=vad_options)
 
@@ -220,19 +226,27 @@ def detect_language(full_audio_file_path, segments_starts, language_detection_mi
         "probability": language_probability,
         "iterations": iteration
     }
+    
+    # Add current detection to the list
+    detected_languages.append(detected_language)
 
+    # Original stopping condition
     if language_probability >= language_detection_min_prob or iteration >= language_detection_max_tries:
-        return detected_language
+        # Check if any German was detected
+        german_detections = [lang for lang in detected_languages if lang["language"] == "de"]
+        
+        if german_detections:
+            # Return the German detection with highest confidence
+            best_german = max(german_detections, key=lambda x: x["probability"])
+            return best_german
+        
+        # Otherwise return highest confidence language
+        return max(detected_languages, key=lambda x: x["probability"])
 
-    next_iteration_detected_language = detect_language(full_audio_file_path, segments_starts,
-                                                       language_detection_min_prob, language_detection_max_tries,
-                                                       asr_options, vad_options, iteration + 1)
-
-    if next_iteration_detected_language["probability"] > detected_language["probability"]:
-        return next_iteration_detected_language
-
-    return detected_language
-
+    # Continue with recursion to check next segment
+    return detect_language(full_audio_file_path, segments_starts,
+                           language_detection_min_prob, language_detection_max_tries,
+                           asr_options, vad_options, iteration + 1, detected_languages)
 
 def extract_audio_segment(input_file_path, start_time_ms, duration_ms):
     input_file_path = Path(input_file_path) if not isinstance(input_file_path, Path) else input_file_path
